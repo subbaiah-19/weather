@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #acb6e5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px);
+      border-radius: 15px;
+      padding: 30px 25px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      color: #fff;
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .container:hover {
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 26px;
+      color: #ffffff;
+    }
+
+    input {
+      width: 80%;
+      padding: 12px 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      padding: 10px 24px;
+      background-color: #ffffff;
+      color: #00796b;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .weather-details {
+      text-align: left;
+      margin-top: 25px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px 20px;
+      color: #ffffff;
+    }
+
+    .weather-details h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .weather-icon {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .weather-icon img {
+      width: 80px;
+      height: 80px;
+    }
+
+    .error {
+      color: #ffcccc;
+      margin-top: 15px;
+    }
+
+    .loading {
+      color: #fff9c4;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌤️ Weather App</h1>
+    <input type="text" id="cityInput" placeholder="Enter city name" />
+    <button onclick="getWeather()">Get Weather</button>
+    <div id="weatherInfo"></div>
+  </div>
+
+  <script>
+    async function getWeather() {
+      const city = document.getElementById('cityInput').value.trim().toLowerCase();
+      const weatherInfo = document.getElementById('weatherInfo');
+
+      if (!city) {
+        weatherInfo.innerHTML = '<p class="error">Please enter a city name.</p>';
+        return;
+      }
+
+      weatherInfo.innerHTML = '<p class="loading">Loading weather...</p>';
+
+      const apiKey = "8dfae5b4c0aa444866726c1e6b9a0ba5"; // Replace with your OpenWeatherMap API key
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("City not found or API error");
+
+        const data = await response.json();
+        const iconCode = data.weather[0].icon;
+        const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+
+        weatherInfo.innerHTML = `
+          <div class="weather-details">
+            <div class="weather-icon">
+              <img src="${iconUrl}" alt="${data.weather[0].description}">
+            </div>
+            <h2>${data.name}, ${data.sys.country}</h2>
+            <p><strong>🌡️ Temperature:</strong> ${data.main.temp}°C (Feels like ${data.main.feels_like}°C)</p>
+            <p><strong>🌤️ Condition:</strong> ${data.weather[0].description}</p>
+            <p><strong>💧 Humidity:</strong> ${data.main.humidity}%</p>
+            <p><strong>🌬️ Wind:</strong> ${data.wind.speed} m/s</p>
+            <p><strong>📈 Pressure:</strong> ${data.main.pressure} mb</p>
+            <p><strong>👁️ Visibility:</strong> ${(data.visibility / 1000).toFixed(1)} km</p>
+          </div>
+        `;
+      } catch (error) {
+        weatherInfo.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    }
+
+    document.getElementById("cityInput").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        getWeather();
+      }
+    });
+  </script>
+</body>
+</html>
